@@ -1,0 +1,328 @@
+
+<div class="container">
+  <!-- <h2>Appointments</h2> -->
+  <section class="content" style="padding-top: 15px;">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="card card-primary card-outline">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h3 class="card-title">
+                Appointments
+              </h3>
+              <!-- /.card-header -->
+              <button  type="button" class="btn btn-primary btn-sm float-right"
+                [hidden]="!isBtnCreateShow" (click)="Create()">
+                <i class="fas fa-plus-circle"></i> Create
+              </button>
+              <button #btnEditShow type="button" style="display: none;" (click)="EditShow()"></button>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body" [hidden]="!isDataGridShow">
+              <div class="row" style="padding-bottom: 20px;">
+                <div class="col-sm-12 col-md-9 d-flex align-items-center">
+                  <label style="width: 60px;">Show </label>
+                  <select style="width: 70px;" [(ngModel)]="length" (ngModelChange)="lengthChange()" 
+                     class="custom-select custom-select-sm form-control form-control-sm">
+                    <option [ngValue]="'10'">10</option>
+                    <option [ngValue]="'25'">25</option>
+                    <option [ngValue]="'50'">50</option>
+                    <option [ngValue]="'100'">100</option>
+                  </select>
+                  <label style="width: 70px; padding-left: 10px;"> entries </label>
+                  <div class="col-4">
+                    <select class="form-control" [(ngModel)]="filterDoctorId" (ngModelChange)="searchClick()">            
+                      <option value="">Filter Doctor ...</option>
+                      <option value="">All</option>                
+                      <option *ngFor="let item of doctors" [ngValue]="item.id">{{item.fullName}}</option>                
+                    </select>
+                  </div>
+                  <div class="col-3 ms-2">
+                    <select class="form-control" [(ngModel)]="filterVisitType" (ngModelChange)="searchClick()">            
+                      <option value="">Filter Visit type ...</option>
+                      <option value="">All</option>  
+                      <option [ngValue]="'First'">First</option>                
+                      <option [ngValue]="'Follow Up'">Follow Up</option>                
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm-12 col-md-3 d-flex justify-content-end">
+                  <div class="row">
+                    <div class="col-12">
+                      <label style="width: 70px; text-align: left;">Search:</label>
+                      <input style="width: 160px; display: inline-block;" type="search" class="form-control form-control-sm" (keydown)="EnterSubmit($event)" [(ngModel)]="searchValue">
+                      <button style="width: 30px; margin-bottom: 2px;" type="submit" class="btn btn-sm btn-default" (click)="searchClick()">
+                        <i class="fa fa-search"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row justify-content-center">
+                <div *ngIf="isProcessing" class="col-12" style="text-align: center;">
+                  <h3>Processing...</h3>
+                </div>
+                <div *ngIf="!isProcessing && recordsFiltered == 0" class="col-12" style="text-align: center;">
+                  <h3>No data found</h3>
+                </div>
+                <div *ngIf="!isProcessing" class="col-12 row">
+                  <table class="table table-bordered  table-striped">
+                    <thead>
+                      <tr>
+                        <th width="3%">Sl.</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Date</th>
+                        <th>Visit Type</th>
+                        <th>Diagnosis</th>
+                        <th class="text-center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let appt of appointments; let i = index">
+                        <td>{{getSerial(i)}}</td>
+                        <td>{{ appt.PatientName }}</td>
+                        <td>{{ appt.DoctorName }}</td>
+                        <td>{{ appt.AppointmentDate | date:'dd-MMM-yyyy' }}</td>
+                        <td>{{ appt.VisitType }}</td>
+                        <td>{{ appt.Diagnosis }}</td>
+                        <td class="text-center">
+                          <button class="btn btn-sm btn-primary" (click)="edit(appt.Id)">
+                            <i class="far fa-edit" style="cursor: pointer"> </i> Edit
+                          </button>
+                          <button class="btn btn-sm btn-danger ms-2" (click)="delete(appt.Id)">
+                            <i class="fas fa-trash-alt" style=" cursor: pointer;"></i> Delete
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-12 col-md-6">
+                  <div *ngIf="!filteredRecordsShow">
+                    Showing {{start}} to {{end}} of {{recordsTotal}} entries
+                  </div>
+                  <div *ngIf="filteredRecordsShow">
+                    Showing {{start}} to {{end}} of {{recordsFiltered}} entries (filtered from {{recordsTotal}} total entries)
+                  </div>
+                </div>
+                <div class="col-sm-12 col-md-6" style="text-align: end;">
+                  <div style="display: inline-block;">
+                    <ul class="pagination">
+                      <li class="page-item"  *ngFor="let page of pageArray" [ngClass]="page.class">
+                        <a href="javascript:void(0)" aria-controls="example1" tabindex="0" class="page-link" (click)="pageClick(page.value)">{{page.title}}</a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /.card-body -->
+
+            <div class="card-body" [hidden]="isDataGridShow">
+              <div class="card-body row">
+                <form [formGroup]="appointmentForm" class="row">
+                  
+                  <div class="col-lg-3 form-group">
+                    <label for="DoctorId">Doctor<span style="color: red;">*</span></label>
+                    <select class="form-control"
+                      [ngClass]="{ 'is-invalid': appointmentForm.get('DoctorId')?.errors && appointmentForm.get('DoctorId')?.touched }"
+                      formControlName="DoctorId" required="true">            
+                      <option value="">Select Please ...</option>
+                      <option *ngFor="let item of doctors" [value]="item.id">{{item.fullName}}</option>                
+                    </select>
+                    <div class="invalid-feedback" *ngIf="appointmentForm.get('DoctorId')?.errors && appointmentForm.get('DoctorId')?.touched">You can't leave this empty.</div>
+                  </div>
+                  <div class="col-lg-3 form-group">
+                    <label for="PatientId">Patient<span style="color: red;">*</span></label>
+                    <select class="form-control"
+                      [ngClass]="{ 'is-invalid': appointmentForm.get('PatientId')?.errors && appointmentForm.get('PatientId')?.touched }"
+                      formControlName="PatientId" required="true">            
+                      <option value="">Select Please ...</option>
+                      <option *ngFor="let item of patients" [value]="item.id">{{item.fullName}}</option>                
+                    </select>
+                    <div class="invalid-feedback" *ngIf="appointmentForm.get('PatientId')?.errors && appointmentForm.get('PatientId')?.touched">You can't leave this empty.</div>
+                  </div>
+                  <div class="col-lg-3 form-group">
+                    <label for="AppointmentDate">Appointment Date<span style="color: red;">*</span></label>
+                    <input type="date" class="datepicker form-control"
+                    [ngClass]="{ 'is-invalid': appointmentForm.get('AppointmentDate')?.errors && appointmentForm.get('AppointmentDate')?.touched }" class="form-control" formControlName="AppointmentDate"
+                      data-date-format="mm/dd/yyyy" required="true">
+                      <div class="invalid-feedback" *ngIf="appointmentForm.get('AppointmentDate')?.errors && appointmentForm.get('AppointmentDate')?.touched">You can't leave this empty.</div>
+                  </div>
+                  <div class="col-lg-3 form-group d-flex align-items-center">
+                    <div class="form-check">
+                      <input 
+                        class="form-check-input" 
+                        type="radio" 
+                        id="visitFirst" 
+                        formControlName="VisitType" 
+                        value="first">
+                      <label class="form-check-label" for="visitFirst">First</label>
+                    </div>
+
+                    <div class="form-check">
+                      <input 
+                        class="form-check-input" 
+                        type="radio" 
+                        id="visitFollowUp" 
+                        formControlName="VisitType" 
+                        value="follow up">
+                      <label class="form-check-label" for="visitFollowUp">Follow Up</label>
+                    </div>
+                  </div>
+                  <div class="col-lg-6 form-group">
+                    <label for="Notes">Notes</label>
+                    <textarea type="text" [ngClass]="{ 'is-invalid': appointmentForm.get('Notes')?.errors && appointmentForm.get('Notes')?.touched }" class="form-control" placeholder="Description" formControlName="Notes"></textarea>
+                    <div class="invalid-feedback" *ngIf="appointmentForm.get('Notes')?.errors && appointmentForm.get('Notes')?.touched">You can't leave this empty.</div>
+                  </div>
+                  <div class="col-lg-6 form-group">
+                    <label for="Diagnosis">Diagnosis</label>
+                    <textarea type="text" [ngClass]="{ 'is-invalid': appointmentForm.get('Diagnosis')?.errors && appointmentForm.get('Diagnosis')?.touched }" class="form-control" placeholder="Description" formControlName="Diagnosis"></textarea>
+                    <div class="invalid-feedback" *ngIf="appointmentForm.get('Diagnosis')?.errors && appointmentForm.get('Diagnosis')?.touched">You can't leave this empty.</div>
+                  </div>
+                </form>
+                <div class="col-12" style="border: 1px solid #ccc;padding-top: 10px;padding-bottom: 10px;margin-top: 10px">
+                  <table class="table table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th>Sl.</th>
+                        <th>Medicine Name</th>
+                        <th>Dosage</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th class="text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <ng-container *ngFor="let record of prescriptionDetailsData; let i = index">
+                        <tr>
+                          <td>{{i+1}}.</td>
+                          <td>{{record?.MedicineName}}</td>
+                          <td>{{record?.Dosage}}</td>
+                          <td>{{record?.StartDate | date:'dd-MMM-yyyy'}}</td>
+                          <td>{{record?.EndDate | date:'dd-MMM-yyyy'}}</td>
+                          <td>
+                            <div>
+                              <div class="text-center">
+                                <button class="btn btn-sm btn-primary" (click)="dEdit(record)">
+                                  <i class="far fa-edit" style="cursor: pointer"> </i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-danger ms-2" (click)="dRemove(record)">
+                                  <i class="fas fa-trash-alt" style=" cursor: pointer;"></i> Delete
+                                </button>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </table>
+                </div>
+                <br>
+                <div class="col-12 form-group panel-close-group" style="margin-top: 10px;">
+                  <button *ngIf="!addNewFormValue" type="button" class="btn btn-primary"
+                    (click)="addNewFormValue = true; addDetailsFormModel();">
+                    <i class="fas fa-plus"></i>
+                    Add new item
+                  </button>
+                  <button *ngIf="addNewFormValue" type="button" class="btn btn-danger panel-close"
+                    (click)="closeVoucherDetails()">
+                    X
+                  </button>
+                </div>
+                <div *ngIf="addNewFormValue" class="col-12 panel-body">
+                  <div class="col-12" *ngIf="formArray.length>0">
+                    <div class="row">
+                      <div class="col-lg-2 form-group">
+                        <label for="SequenceNo">Medicines<span style="color: red;">*</span></label>
+                      </div>
+                      <div class="col-lg-2 form-group">
+                        <label for="AccountId">Dosage</label>
+                      </div>
+                      <div class="col-lg-2 form-group">
+                        <label for="AccountId">Start Date</label>
+                      </div>
+                      <div class="col-lg-2 form-group">
+                        <label for="AccountId">EndDate</label>
+                      </div>
+                      <div class="col-lg-3 form-group">
+                        <label for="AccountId">Notes</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div *ngFor="let formGroup of formArray; let i = index" class="col-12">
+                    <form [formGroup]="formGroup" class="row">
+                      <div class="col-lg-2 form-group">
+                        <select class="form-control"
+                          [ngClass]="{ 'is-invalid': formGroup.get('MedicineId')?.errors && formGroup.get('MedicineId')?.touched }"
+                          formControlName="MedicineId" required="true">            
+                          <option value="">Select Please ...</option>
+                          <option *ngFor="let item of medicines" [value]="item.id">{{item.name}}</option>                
+                        </select>
+                        <div class="invalid-feedback" *ngIf="formGroup.get('MedicineId')?.errors && formGroup.get('MedicineId')?.touched">You can't leave this empty.</div>
+                      </div>
+                      <div class="col-lg-2 form-group">
+                          <input type="text" class="form-control" formControlName="Dosage">
+                      </div>
+                      <div class="col-lg-2 form-group">
+                          <input type="date" class="datepicker form-control" data-date-format="mm/dd/yyyy" formControlName="StartDate">
+                      </div>
+                      <div class="col-lg-2 form-group">
+                          <input type="date" class="datepicker form-control" data-date-format="mm/dd/yyyy" formControlName="EndDate">
+                      </div>
+                      <div class="col-lg-3 form-group">
+                        <textarea type="text" class="form-control" placeholder="Notes" formControlName="Notes"></textarea>
+                      </div>
+                      <div class="col-lg-1 d-flex justify-content-center align-items-start">
+                        <button type="button"
+                            class="btn btn-primary btn-sm float-right"
+                            style="margin-top: 3px;"
+                            (click)="removeVoucherDetailsField(i);">
+                            -
+                          </button>
+                      </div>
+                    </form>
+                  </div>
+                  
+                  <button type="button" class="btn btn-primary" (click)="addToGrid()">
+                    <i class="fas fa-plus"></i>
+                    {{ addToGridButtonText }}
+                  </button>
+                </div>
+
+              </div>
+              <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="Close()">
+                  <i class="fas fa-window-close"></i>
+                  Close
+                </button>
+                <div class="">
+                  <button type="button" class="btn btn-success me-2" (click)="sendPrescriptionMail();">
+                    <div *ngIf="isProcessingMail" class="spinner-border text-light spinner-border-sm" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <i class="far fa-envelope"></i> Send Prescription Mail
+                  </button>
+
+                  <button type="submit" class="btn btn-primary" (click)="saveOrUpdateAppointment();">
+                    <div *ngIf="isProcessing" class="spinner-border text-light spinner-border-sm" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <i class="far fa-bookmark"></i> Save
+                  </button>
+                </div>
+              </div>
+              <!-- </form> -->
+            </div>
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </div>
+  </section>
+</div>
