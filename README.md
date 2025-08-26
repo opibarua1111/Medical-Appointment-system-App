@@ -1,59 +1,83 @@
-# MedicalAppointmentSystemApp
+# Medical Appointment System App
+
+This project is a Medical Appointment Management System built with a frontend (Angular), backend (ASP.NET Core Web API), and a SQL Server database. It allows patients to book appointments, doctors to manage schedules, and admins to oversee the system.
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.7.
 
-## Development server
+Backend repository: [click](https://github.com/opibarua1111/Medical-Appointment-System-Api)
 
-To start a local development server, run:
+## 🚀 Tech Stack
 
+
+## Frontend
+
+Angular 19
+
+Bootstrap 5
+
+RxJS
+
+ngx-toastr
+
+## Backend
+
+ASP.NET Core 8 Web API
+
+Entity Framework Core
+
+RESTful API Architecture
+
+SOLID principles
+
+## Database
+
+Microsoft SQL Server
+
+SQL Migration & Seed Scripts
+
+Stored procedure
+
+Relational database
+
+## Database⚙️ Features
+
+Doctor Management (Add, Update, View Doctors)
+
+Patient Management
+
+Appointment Booking & Scheduling
+
+Prescription Management
+
+Presciption Mail system with PDF attachment
+
+## Frontend Setup (Angular)
+
+Install dependencies:
+```bash
+npm install
+```
+
+Run the development server:
 ```bash
 ng serve
 ```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+Open in browser: 
 ```bash
-ng generate component component-name
+[ng serve](http://localhost:4200/)
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## 🔧 Backend Setup (ASP.NET Core)
+
+Update appsettings.json with your SQL Server connection string:
 
 ```bash
-ng generate --help
+"ConnectionStrings": {
+  "DefaultConnection": "Server=YOUR_SERVER;Database=MedicalAppointmentDB;Trusted_Connection=True;TrustServerCertificate=True;"
+}
 ```
-
-## Building
-
-To build the project run:
-
+Run database migrations:
 ```bash
-ng build
+Update-Database
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
