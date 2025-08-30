@@ -242,6 +242,7 @@ export class AppointmentsComponent {
           this.prescriptionDetailsData[index].Notes = Notes;
         }
       }
+      this.toastrService.warning('', 'Please Save.');
       this.addNewFormValue = false;
       this.formArray = [];
       this.addToGridButtonText = "Add to Grid";
@@ -436,7 +437,7 @@ export class AppointmentsComponent {
     this.authService.sendPrescriptionMail(appointmentId).subscribe((res: any) => {
       this.isProcessingMail = false;
       this.toastrService.success('', res.message);
-      this.getAppointments();
+      
     }, error => {
       this.isProcessingMail = false;
       this.toastrService.error('', 'Send Mail failed.');
