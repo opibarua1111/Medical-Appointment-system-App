@@ -68,7 +68,7 @@ export class AppointmentsComponent {
       this.recordsTotal = res.data.recordsTotal;
       this.recordsFiltered = res.data.recordsFiltered;
       this.filteredRecordsShow = (this.recordsTotal != this.recordsFiltered);
-      this.totalPage = Math.ceil(this.totalRows / 10);
+      this.totalPage = Math.ceil(this.recordsFiltered / Number(this.length));
 
       this.createPageList();
       this.start = (((this.pageNo * Number(this.length)) - Number(this.length)) + 1);
@@ -428,7 +428,7 @@ export class AppointmentsComponent {
   sendPrescriptionMail() {
     this.isProcessingMail = true;
     this.AddPrescriptionDetailsModel();
-    if (!this.prescriptionDetailsData) {
+    if (!this.prescriptionDetailsData || this.prescriptionDetailsData.length == 0) {
       this.isProcessingMail = false;
       this.toastrService.warning('Warning', 'Please add Prescription Details');
       return;
